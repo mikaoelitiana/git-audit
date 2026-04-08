@@ -425,7 +425,7 @@ func (m Model) titleBar() string {
 	themeBadge := t.Dim.Render(fmt.Sprintf(" %s ", themeIcon))
 
 	var tabs strings.Builder
-	for i := 0; i < numPanels; i++ {
+	for i := range numPanels {
 		key := fmt.Sprintf("%d", i+1)
 		if i == 9 {
 			key = "0"

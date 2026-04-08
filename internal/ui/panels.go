@@ -16,7 +16,9 @@ const barWidth = 14
 
 func cmdLine(t *theme.Theme, cmd string) string {
 	parts := strings.Fields(cmd)
-	if len(parts) == 0 { return cmd }
+	if len(parts) == 0 {
+		return cmd
+	}
 	var out strings.Builder
 	out.WriteString(t.CmdPrompt.Render("$ "))
 	for i, p := range parts {
@@ -45,26 +47,36 @@ func divider(t *theme.Theme, width int) string {
 }
 
 func truncatePath(path string, max int) string {
-	if len([]rune(path)) <= max { return path }
+	if len([]rune(path)) <= max {
+		return path
+	}
 	parts := strings.Split(path, "/")
 	file := parts[len(parts)-1]
-	if len(file) >= max { return theme.Truncate(file, max) }
+	if len(file) >= max {
+		return theme.Truncate(file, max)
+	}
 	for i := len(parts) - 2; i >= 0; i-- {
 		candidate := "…/" + strings.Join(parts[i:], "/")
-		if len([]rune(candidate)) <= max { return candidate }
+		if len([]rune(candidate)) <= max {
+			return candidate
+		}
 	}
 	return theme.Truncate(file, max)
 }
 
 func pad(s string, n int) string {
 	r := []rune(s)
-	if len(r) >= n { return string(r[:n]) }
+	if len(r) >= n {
+		return string(r[:n])
+	}
 	return s + strings.Repeat(" ", n-len(r))
 }
 
 func rpad(s string, n int) string {
 	r := []rune(s)
-	if len(r) >= n { return string(r[:n]) }
+	if len(r) >= n {
+		return string(r[:n])
+	}
 	return strings.Repeat(" ", n-len(r)) + s
 }
 
@@ -74,18 +86,29 @@ func renderChurn(t *theme.Theme, data []git.ChurnEntry, err error, loading bool,
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.ChurnCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
-	if len(data) == 0 { b.WriteString(t.Dim.Render("  no results — is this a git repository with history?")); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
+	if len(data) == 0 {
+		b.WriteString(t.Dim.Render("  no results — is this a git repository with history?"))
+		return b.String()
+	}
 
-	b.WriteString(t.InsightWarn.Width(width-6).Render(
+	b.WriteString(t.InsightWarn.Width(width - 6).Render(
 		t.AmberB.Render("▲ insight  ") +
 			t.Amber.Render("High churn ≠ bad. But a file in both churn and bug lists is patch-on-patch territory — your highest risk."),
 	))
 	b.WriteString("\n\n")
 
 	fileW := width - 46
-	if fileW < 20 { fileW = 20 }
+	if fileW < 20 {
+		fileW = 20
+	}
 	b.WriteString("  " + t.TableHeader.Render(rpad("#", 3)) + "  " +
 		t.TableHeader.Render(pad("FILE", fileW)) + "  " +
 		t.TableHeader.Render(rpad("CHANGES", 8)) + "  " +
@@ -98,7 +121,11 @@ func renderChurn(t *theme.Theme, data []git.ChurnEntry, err error, loading bool,
 		e := data[i]
 		riskStyle := t.RiskStyle(e.Pct)
 		countStyle := t.Amber
-		if e.Pct > 75 { countStyle = t.RedB } else if e.Pct < 30 { countStyle = t.Dim }
+		if e.Pct > 75 {
+			countStyle = t.RedB
+		} else if e.Pct < 30 {
+			countStyle = t.Dim
+		}
 
 		b.WriteString("  " +
 			t.Muted.Render(rpad(fmt.Sprintf("%d", i+1), 3)) + "  " +
@@ -120,12 +147,26 @@ func renderBusFactor(t *theme.Theme, data []git.Contributor, err error, loading 
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.BusFactorCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
-	if len(data) == 0 { b.WriteString(t.Dim.Render("  no contributors found")); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
+	if len(data) == 0 {
+		b.WriteString(t.Dim.Render("  no contributors found"))
+		return b.String()
+	}
 
 	total, activeCount := 0, 0
-	for _, c := range data { total += c.Commits; if c.Active { activeCount++ } }
+	for _, c := range data {
+		total += c.Commits
+		if c.Active {
+			activeCount++
+		}
+	}
 	top := data[0]
 
 	var insightStyle lipgloss.Style
@@ -133,7 +174,9 @@ func renderBusFactor(t *theme.Theme, data []git.Contributor, err error, loading 
 	if top.Pct >= 60 {
 		insightStyle = t.InsightCrit
 		activeStr := "still active"
-		if !top.Active { activeStr = t.RedB.Render("⚠ NO LONGER ACTIVE") }
+		if !top.Active {
+			activeStr = t.RedB.Render("⚠ NO LONGER ACTIVE")
+		}
 		insightText = t.RedB.Render("⬡ bus factor: 1  ") +
 			t.Red.Render(fmt.Sprintf("%s owns %.0f%% of commits — %s", top.Name, top.Pct, activeStr))
 	} else {
@@ -145,7 +188,9 @@ func renderBusFactor(t *theme.Theme, data []git.Contributor, err error, loading 
 	b.WriteString("\n\n")
 
 	nameW := width - 52
-	if nameW < 20 { nameW = 20 }
+	if nameW < 20 {
+		nameW = 20
+	}
 	actW := barWidth + 2
 	b.WriteString("  " + t.TableHeader.Render(rpad("#", 3)) + "  " +
 		t.TableHeader.Render(pad("CONTRIBUTOR", nameW)) + "  " +
@@ -159,11 +204,21 @@ func renderBusFactor(t *theme.Theme, data []git.Contributor, err error, loading 
 	for i := scroll; i < len(data) && shown < height-8; i++ {
 		c := data[i]
 		nameStyle := t.Base
-		if i == 0 { nameStyle = t.BlueB } else if !c.Active { nameStyle = t.Muted }
+		if i == 0 {
+			nameStyle = t.BlueB
+		} else if !c.Active {
+			nameStyle = t.Muted
+		}
 		barStyle := t.Blue
-		if i == 0 { barStyle = t.AmberB } else if !c.Active { barStyle = t.Muted }
+		if i == 0 {
+			barStyle = t.AmberB
+		} else if !c.Active {
+			barStyle = t.Muted
+		}
 		statusStr := t.Green.Render("● active")
-		if !c.Active { statusStr = t.Red.Render("○ gone  ") }
+		if !c.Active {
+			statusStr = t.Red.Render("○ gone  ")
+		}
 
 		b.WriteString("  " +
 			t.Muted.Render(rpad(fmt.Sprintf("%d", i+1), 3)) + "  " +
@@ -186,12 +241,25 @@ func renderBugs(t *theme.Theme, data []git.BugEntry, err error, loading bool, sc
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.BugCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
-	if len(data) == 0 { b.WriteString(t.Dim.Render("  no bug-related commits found")); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
+	if len(data) == 0 {
+		b.WriteString(t.Dim.Render("  no bug-related commits found"))
+		return b.String()
+	}
 
 	overlap := 0
-	for _, e := range data { if e.InChurn { overlap++ } }
+	for _, e := range data {
+		if e.InChurn {
+			overlap++
+		}
+	}
 
 	var insightStyle lipgloss.Style
 	var insightText string
@@ -207,7 +275,9 @@ func renderBugs(t *theme.Theme, data []git.BugEntry, err error, loading bool, sc
 	b.WriteString("\n\n")
 
 	fileW := width - 46
-	if fileW < 20 { fileW = 20 }
+	if fileW < 20 {
+		fileW = 20
+	}
 	b.WriteString("  " + t.TableHeader.Render(rpad("#", 3)) + "  " +
 		t.TableHeader.Render(pad("FILE", fileW)) + "  " +
 		t.TableHeader.Render(rpad("BUG COMMITS", 11)) + "  " +
@@ -219,9 +289,17 @@ func renderBugs(t *theme.Theme, data []git.BugEntry, err error, loading bool, sc
 	for i := scroll; i < len(data) && shown < height-8; i++ {
 		e := data[i]
 		fileStyle, barStyle := t.Base, t.Blue
-		if e.InChurn { fileStyle = t.RedB; barStyle = t.Red } else if e.Pct > 60 { fileStyle = t.Amber; barStyle = t.Amber }
+		if e.InChurn {
+			fileStyle = t.RedB
+			barStyle = t.Red
+		} else if e.Pct > 60 {
+			fileStyle = t.Amber
+			barStyle = t.Amber
+		}
 		overlapStr := t.Muted.Render("  —      ")
-		if e.InChurn { overlapStr = t.RedB.Render("  ✕ YES  ") }
+		if e.InChurn {
+			overlapStr = t.RedB.Render("  ✕ YES  ")
+		}
 
 		b.WriteString("  " +
 			t.Muted.Render(rpad(fmt.Sprintf("%d", i+1), 3)) + "  " +
@@ -243,35 +321,63 @@ func renderVelocity(t *theme.Theme, data []git.VelocityEntry, err error, loading
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.VelocityCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
-	if len(data) == 0 { b.WriteString(t.Dim.Render("  no commit history found")); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
+	if len(data) == 0 {
+		b.WriteString(t.Dim.Render("  no commit history found"))
+		return b.String()
+	}
 
 	total, maxC := 0, 0
-	for _, e := range data { total += e.Count; if e.Count > maxC { maxC = e.Count } }
+	for _, e := range data {
+		total += e.Count
+		if e.Count > maxC {
+			maxC = e.Count
+		}
+	}
 	avg := float64(total) / float64(len(data))
 	recent := data
-	if len(data) > 6 { recent = data[len(data)-6:] }
+	if len(data) > 6 {
+		recent = data[len(data)-6:]
+	}
 	recentTotal := 0
-	for _, e := range recent { recentTotal += e.Count }
+	for _, e := range recent {
+		recentTotal += e.Count
+	}
 	recentAvg := float64(recentTotal) / float64(len(recent))
 
 	trendStr := t.Green.Render("→ steady")
-	if recentAvg > avg*1.1 { trendStr = t.GreenB.Render("↑ accelerating") } else if recentAvg < avg*0.8 { trendStr = t.RedB.Render("↓ declining") }
+	if recentAvg > avg*1.1 {
+		trendStr = t.GreenB.Render("↑ accelerating")
+	} else if recentAvg < avg*0.8 {
+		trendStr = t.RedB.Render("↓ declining")
+	}
 
-	b.WriteString(t.InsightInfo.Width(width-6).Render(
+	b.WriteString(t.InsightInfo.Width(width - 6).Render(
 		t.Blue.Render(fmt.Sprintf("avg: %.0f/mo   recent avg: %.0f/mo   trend: ", avg, recentAvg)) + trendStr,
 	))
 	b.WriteString("\n\n")
 
 	chartH := height - 12
-	if chartH < 4 { chartH = 4 }
-	if chartH > 16 { chartH = 16 }
+	if chartH < 4 {
+		chartH = 4
+	}
+	if chartH > 16 {
+		chartH = 16
+	}
 
 	colW := 6
 	maxCols := (width - 8) / colW
 	visible := data
-	if len(visible) > maxCols { visible = visible[len(visible)-maxCols:] }
+	if len(visible) > maxCols {
+		visible = visible[len(visible)-maxCols:]
+	}
 
 	for row := 0; row < chartH; row++ {
 		rowVal := float64(maxC) * float64(chartH-row) / float64(chartH)
@@ -282,7 +388,13 @@ func renderVelocity(t *theme.Theme, data []git.VelocityEntry, err error, loading
 			if cellVal <= filled {
 				pct := float64(e.Count) / float64(maxC)
 				var colStyle lipgloss.Style
-				if pct > 0.75 { colStyle = t.GreenB } else if pct > 0.4 { colStyle = t.Amber } else { colStyle = t.Red }
+				if pct > 0.75 {
+					colStyle = t.GreenB
+				} else if pct > 0.4 {
+					colStyle = t.Amber
+				} else {
+					colStyle = t.Red
+				}
 				b.WriteString(colStyle.Render(" ████ "))
 			} else {
 				b.WriteString("      ")
@@ -290,7 +402,7 @@ func renderVelocity(t *theme.Theme, data []git.VelocityEntry, err error, loading
 		}
 		b.WriteString("\n")
 	}
-	b.WriteString(t.Muted.Render("       └" + strings.Repeat("──────", len(visible))) + "\n")
+	b.WriteString(t.Muted.Render("       └"+strings.Repeat("──────", len(visible))) + "\n")
 	b.WriteString("        ")
 	for _, e := range visible {
 		lbl := strings.Replace(e.Month[2:], "-", ".", 1)
@@ -310,20 +422,28 @@ func renderStale(t *theme.Theme, data []git.StaleEntry, err error, loading bool,
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.StaleLogCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
-	if len(data) == 0 {
-		b.WriteString(t.InsightOk.Width(width-6).Render(t.GreenB.Render("✓  ") + t.Green.Render("No stale files — everything touched in the last year.")))
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
 		return b.String()
 	}
-	b.WriteString(t.InsightWarn.Width(width-6).Render(
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
+	if len(data) == 0 {
+		b.WriteString(t.InsightOk.Width(width - 6).Render(t.GreenB.Render("✓  ") + t.Green.Render("No stale files — everything touched in the last year.")))
+		return b.String()
+	}
+	b.WriteString(t.InsightWarn.Width(width - 6).Render(
 		t.AmberB.Render("▲ insight  ") +
 			t.Amber.Render(fmt.Sprintf("%d file(s) untouched for 1+ year — candidates for deletion or archival.", len(data))),
 	))
 	b.WriteString("\n\n")
 
 	fileW := width - 38
-	if fileW < 20 { fileW = 20 }
+	if fileW < 20 {
+		fileW = 20
+	}
 	b.WriteString("  " + t.TableHeader.Render(rpad("#", 3)) + "  " +
 		t.TableHeader.Render(pad("FILE", fileW)) + "  " +
 		t.TableHeader.Render(rpad("LAST CHANGED", 12)) + "  " +
@@ -334,9 +454,15 @@ func renderStale(t *theme.Theme, data []git.StaleEntry, err error, loading bool,
 	for i := scroll; i < len(data) && shown < height-8; i++ {
 		e := data[i]
 		age := t.Amber
-		if e.DaysAgo > 730 { age = t.RedB } else if e.DaysAgo < 400 { age = t.Dim }
+		if e.DaysAgo > 730 {
+			age = t.RedB
+		} else if e.DaysAgo < 400 {
+			age = t.Dim
+		}
 		daysStr := fmt.Sprintf("%d", e.DaysAgo)
-		if e.DaysAgo == 9999 { daysStr = "never" }
+		if e.DaysAgo == 9999 {
+			daysStr = "never"
+		}
 		b.WriteString("  " +
 			t.Muted.Render(rpad(fmt.Sprintf("%d", i+1), 3)) + "  " +
 			pad(truncatePath(e.File, fileW), fileW) + "  " +
@@ -356,12 +482,25 @@ func renderBranches(t *theme.Theme, data []git.BranchEntry, err error, loading b
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.BranchListCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
-	if len(data) == 0 { b.WriteString(t.Dim.Render("  no local branches found")); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
+	if len(data) == 0 {
+		b.WriteString(t.Dim.Render("  no local branches found"))
+		return b.String()
+	}
 
 	old := 0
-	for _, e := range data { if e.DaysAgo > 90 { old++ } }
+	for _, e := range data {
+		if e.DaysAgo > 90 {
+			old++
+		}
+	}
 	var insightStyle lipgloss.Style
 	var insightText string
 	if old > 0 {
@@ -376,7 +515,9 @@ func renderBranches(t *theme.Theme, data []git.BranchEntry, err error, loading b
 	b.WriteString("\n\n")
 
 	nameW := width - 44
-	if nameW < 20 { nameW = 20 }
+	if nameW < 20 {
+		nameW = 20
+	}
 	b.WriteString("  " + t.TableHeader.Render(rpad("#", 3)) + "  " +
 		t.TableHeader.Render(pad("BRANCH", nameW)) + "  " +
 		t.TableHeader.Render(rpad("LAST COMMIT", 11)) + "  " +
@@ -388,7 +529,11 @@ func renderBranches(t *theme.Theme, data []git.BranchEntry, err error, loading b
 	for i := scroll; i < len(data) && shown < height-8; i++ {
 		e := data[i]
 		ageStyle := t.Green
-		if e.DaysAgo > 180 { ageStyle = t.RedB } else if e.DaysAgo > 90 { ageStyle = t.Amber }
+		if e.DaysAgo > 180 {
+			ageStyle = t.RedB
+		} else if e.DaysAgo > 90 {
+			ageStyle = t.Amber
+		}
 		b.WriteString("  " +
 			t.Muted.Render(rpad(fmt.Sprintf("%d", i+1), 3)) + "  " +
 			t.Base.Render(pad(theme.Truncate(e.Name, nameW), nameW)) + "  " +
@@ -409,20 +554,28 @@ func renderCoupling(t *theme.Theme, data []git.CouplingEntry, err error, loading
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.CoChangeCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
-	if len(data) == 0 {
-		b.WriteString(t.InsightOk.Width(width-6).Render(t.GreenB.Render("✓  ") + t.Green.Render("No strong coupling detected (no pair changed together ≥3 times).")))
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
 		return b.String()
 	}
-	b.WriteString(t.InsightWarn.Width(width-6).Render(
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
+	if len(data) == 0 {
+		b.WriteString(t.InsightOk.Width(width - 6).Render(t.GreenB.Render("✓  ") + t.Green.Render("No strong coupling detected (no pair changed together ≥3 times).")))
+		return b.String()
+	}
+	b.WriteString(t.InsightWarn.Width(width - 6).Render(
 		t.AmberB.Render("▲ insight  ") +
 			t.Amber.Render("These file pairs are always committed together — hidden coupling, consider extracting shared logic."),
 	))
 	b.WriteString("\n\n")
 
 	halfW := (width - 22) / 2
-	if halfW < 15 { halfW = 15 }
+	if halfW < 15 {
+		halfW = 15
+	}
 	b.WriteString("  " + t.TableHeader.Render(rpad("#", 3)) + "  " +
 		t.TableHeader.Render(pad("FILE A", halfW)) + "  " +
 		t.TableHeader.Render(pad("FILE B", halfW)) + "  " +
@@ -434,7 +587,11 @@ func renderCoupling(t *theme.Theme, data []git.CouplingEntry, err error, loading
 	for i := scroll; i < len(data) && shown < height-8; i++ {
 		e := data[i]
 		barStyle := t.Blue
-		if e.Pct > 75 { barStyle = t.RedB } else if e.Pct > 40 { barStyle = t.Amber }
+		if e.Pct > 75 {
+			barStyle = t.RedB
+		} else if e.Pct > 40 {
+			barStyle = t.Amber
+		}
 		b.WriteString("  " +
 			t.Muted.Render(rpad(fmt.Sprintf("%d", i+1), 3)) + "  " +
 			pad(truncatePath(e.FileA, halfW), halfW) + "  " +
@@ -455,19 +612,24 @@ func renderFresh(t *theme.Theme, data []git.FreshEntry, err error, loading bool,
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.FreshCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
+
 	if len(data) == 0 {
 		b.WriteString(t.Dim.Render("  no new files in the last 90 days"))
 		return b.String()
 	}
-	b.WriteString(t.InsightInfo.Width(width-6).Render(
-		t.Blue.Render(fmt.Sprintf("ℹ  %d new file(s) added in the last 90 days — onboarding surface area.", len(data))),
-	))
-	b.WriteString("\n\n")
 
 	fileW := width - 42
-	if fileW < 20 { fileW = 20 }
+	if fileW < 20 {
+		fileW = 20
+	}
 	authorW := 18
 	b.WriteString("  " + t.TableHeader.Render(rpad("#", 3)) + "  " +
 		t.TableHeader.Render(pad("FILE", fileW)) + "  " +
@@ -480,7 +642,56 @@ func renderFresh(t *theme.Theme, data []git.FreshEntry, err error, loading bool,
 	for i := scroll; i < len(data) && shown < height-8; i++ {
 		e := data[i]
 		ageStyle := t.GreenB
-		if e.DaysAgo > 60 { ageStyle = t.Dim } else if e.DaysAgo > 30 { ageStyle = t.Green }
+		if e.DaysAgo > 60 {
+			ageStyle = t.Dim
+		} else if e.DaysAgo > 30 {
+			ageStyle = t.Green
+		}
+		b.WriteString("  " +
+			t.Muted.Render(rpad(fmt.Sprintf("%d", i+1), 3)) + "  " +
+			pad(truncatePath(e.File, fileW), fileW) + "  " +
+			t.Dim.Render(rpad(e.Date, 10)) + "  " +
+			ageStyle.Render(rpad(fmt.Sprintf("%d", e.DaysAgo), 8)) + "  " +
+			t.Muted.Render(theme.Truncate(e.Author, authorW)) + "\n")
+		shown++
+	}
+	if scroll+shown < len(data) {
+		b.WriteString(t.Muted.Render(fmt.Sprintf("  … %d more", len(data)-scroll-shown)))
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
+	if len(data) == 0 {
+		b.WriteString(t.Dim.Render("  no new files in the last 90 days"))
+		return b.String()
+	}
+	b.WriteString(t.InsightInfo.Width(width - 6).Render(
+		t.Blue.Render(fmt.Sprintf("ℹ  %d new file(s) added in the last 90 days — onboarding surface area.", len(data))),
+	))
+	b.WriteString("\n\n")
+
+	fileW = width - 42
+	if fileW < 20 {
+		fileW = 20
+	}
+	authorW = 18
+	b.WriteString("  " + t.TableHeader.Render(rpad("#", 3)) + "  " +
+		t.TableHeader.Render(pad("FILE", fileW)) + "  " +
+		t.TableHeader.Render(rpad("DATE", 10)) + "  " +
+		t.TableHeader.Render(rpad("DAYS AGO", 8)) + "  " +
+		t.TableHeader.Render(pad("AUTHOR", authorW)) + "\n")
+	b.WriteString("  " + divider(t, width-4) + "\n")
+
+	shown = 0
+	for i := scroll; i < len(data) && shown < height-8; i++ {
+		e := data[i]
+		ageStyle := t.GreenB
+		if e.DaysAgo > 60 {
+			ageStyle = t.Dim
+		} else if e.DaysAgo > 30 {
+			ageStyle = t.Green
+		}
 		b.WriteString("  " +
 			t.Muted.Render(rpad(fmt.Sprintf("%d", i+1), 3)) + "  " +
 			pad(truncatePath(e.File, fileW), fileW) + "  " +
@@ -501,15 +712,25 @@ func renderOwnership(t *theme.Theme, data []git.OwnershipEntry, err error, loadi
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.OwnerNewCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
 	if len(data) == 0 {
-		b.WriteString(t.InsightOk.Width(width-6).Render(t.GreenB.Render("✓  ") + t.Green.Render("No ownership changes detected.")))
+		b.WriteString(t.InsightOk.Width(width - 6).Render(t.GreenB.Render("✓  ") + t.Green.Render("No ownership changes detected.")))
 		return b.String()
 	}
 
 	drifted := 0
-	for _, e := range data { if e.Drifted { drifted++ } }
+	for _, e := range data {
+		if e.Drifted {
+			drifted++
+		}
+	}
 	var insightStyle lipgloss.Style
 	var insightText string
 	if drifted > 0 {
@@ -524,7 +745,9 @@ func renderOwnership(t *theme.Theme, data []git.OwnershipEntry, err error, loadi
 	b.WriteString("\n\n")
 
 	fileW := (width - 46) / 2
-	if fileW < 15 { fileW = 15 }
+	if fileW < 15 {
+		fileW = 15
+	}
 	b.WriteString("  " + t.TableHeader.Render(rpad("#", 3)) + "  " +
 		t.TableHeader.Render(pad("FILE", fileW)) + "  " +
 		t.TableHeader.Render(pad("OLD OWNER", fileW)) + "  " +
@@ -536,9 +759,13 @@ func renderOwnership(t *theme.Theme, data []git.OwnershipEntry, err error, loadi
 	for i := scroll; i < len(data) && shown < height-8; i++ {
 		e := data[i]
 		driftStr := t.Muted.Render("  —    ")
-		if e.Drifted { driftStr = t.AmberB.Render("  ✕ YES") }
+		if e.Drifted {
+			driftStr = t.AmberB.Render("  ✕ YES")
+		}
 		oldStr := e.OldOwner
-		if oldStr == "" { oldStr = "—" }
+		if oldStr == "" {
+			oldStr = "—"
+		}
 		b.WriteString("  " +
 			t.Muted.Render(rpad(fmt.Sprintf("%d", i+1), 3)) + "  " +
 			pad(truncatePath(e.File, fileW), fileW) + "  " +
@@ -559,17 +786,32 @@ func renderTestRatio(t *theme.Theme, data []git.TestRatioEntry, err error, loadi
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.TestRatioCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
-	if len(data) == 0 { b.WriteString(t.Dim.Render("  no commits found in the last year")); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
+	if len(data) == 0 {
+		b.WriteString(t.Dim.Render("  no commits found in the last year"))
+		return b.String()
+	}
 
 	testTotal, srcTotal := 0, 0
 	for _, e := range data {
-		if e.IsTest { testTotal += e.Count } else { srcTotal += e.Count }
+		if e.IsTest {
+			testTotal += e.Count
+		} else {
+			srcTotal += e.Count
+		}
 	}
 	total := testTotal + srcTotal
 	var testPct float64
-	if total > 0 { testPct = float64(testTotal) / float64(total) * 100 }
+	if total > 0 {
+		testPct = float64(testTotal) / float64(total) * 100
+	}
 
 	var insightStyle lipgloss.Style
 	var insightText string
@@ -591,7 +833,9 @@ func renderTestRatio(t *theme.Theme, data []git.TestRatioEntry, err error, loadi
 	b.WriteString("\n\n")
 
 	fileW := width - 38
-	if fileW < 20 { fileW = 20 }
+	if fileW < 20 {
+		fileW = 20
+	}
 	b.WriteString("  " + t.TableHeader.Render(rpad("#", 3)) + "  " +
 		t.TableHeader.Render(pad("FILE", fileW)) + "  " +
 		t.TableHeader.Render(rpad("CHANGES", 7)) + "  " +
@@ -604,7 +848,10 @@ func renderTestRatio(t *theme.Theme, data []git.TestRatioEntry, err error, loadi
 		e := data[i]
 		typeStr := t.Blue.Render("src ")
 		barStyle := t.Blue
-		if e.IsTest { typeStr = t.Cyan.Render("test"); barStyle = t.Cyan }
+		if e.IsTest {
+			typeStr = t.Cyan.Render("test")
+			barStyle = t.Cyan
+		}
 		b.WriteString("  " +
 			t.Muted.Render(rpad(fmt.Sprintf("%d", i+1), 3)) + "  " +
 			pad(truncatePath(e.File, fileW), fileW) + "  " +
@@ -625,16 +872,29 @@ func renderCommitSizes(t *theme.Theme, data []git.CommitSizeBucket, err error, l
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.CommitSizeCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
 
 	total := 0
-	for _, b2 := range data { total += b2.Count }
-	if total == 0 { b.WriteString(t.Dim.Render("  no commits found in the last year")); return b.String() }
+	for _, b2 := range data {
+		total += b2.Count
+	}
+	if total == 0 {
+		b.WriteString(t.Dim.Render("  no commits found in the last year"))
+		return b.String()
+	}
 
 	hugeIdx := len(data) - 1
 	hugePct := 0.0
-	if len(data) > 0 { hugePct = data[hugeIdx].Pct }
+	if len(data) > 0 {
+		hugePct = data[hugeIdx].Pct
+	}
 	var insightStyle lipgloss.Style
 	var insightText string
 	if hugePct > 10 {
@@ -649,7 +909,9 @@ func renderCommitSizes(t *theme.Theme, data []git.CommitSizeBucket, err error, l
 	b.WriteString("\n\n")
 
 	barW := width - 32
-	if barW < 20 { barW = 20 }
+	if barW < 20 {
+		barW = 20
+	}
 	b.WriteString("  " + t.TableHeader.Render(pad("SIZE BUCKET", 22)) + "  " +
 		t.TableHeader.Render(rpad("COUNT", 6)) + "  " +
 		t.TableHeader.Render(rpad("PCT", 5)) + "  " +
@@ -658,8 +920,12 @@ func renderCommitSizes(t *theme.Theme, data []git.CommitSizeBucket, err error, l
 
 	for _, bucket := range data {
 		barStyle := t.Green
-		if bucket.Pct > 30 && strings.Contains(bucket.Label, "large") { barStyle = t.Amber }
-		if strings.Contains(bucket.Label, "huge") && bucket.Pct > 5 { barStyle = t.RedB }
+		if bucket.Pct > 30 && strings.Contains(bucket.Label, "large") {
+			barStyle = t.Amber
+		}
+		if strings.Contains(bucket.Label, "huge") && bucket.Pct > 5 {
+			barStyle = t.RedB
+		}
 		b.WriteString("  " +
 			pad(bucket.Label, 22) + "  " +
 			t.Dim.Render(rpad(fmt.Sprintf("%d", bucket.Count), 6)) + "  " +
@@ -675,37 +941,62 @@ func renderMergeFreq(t *theme.Theme, data []git.MergeFreqEntry, err error, loadi
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.MergeFreqCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
 	if len(data) == 0 {
 		b.WriteString(t.Dim.Render("  no merge commits found — repo may use rebase workflow"))
 		return b.String()
 	}
 
 	total, maxC := 0, 0
-	for _, e := range data { total += e.Count; if e.Count > maxC { maxC = e.Count } }
+	for _, e := range data {
+		total += e.Count
+		if e.Count > maxC {
+			maxC = e.Count
+		}
+	}
 	avg := float64(total) / float64(len(data))
 	recent := data
-	if len(data) > 3 { recent = data[len(data)-3:] }
+	if len(data) > 3 {
+		recent = data[len(data)-3:]
+	}
 	recentTotal := 0
-	for _, e := range recent { recentTotal += e.Count }
+	for _, e := range recent {
+		recentTotal += e.Count
+	}
 	recentAvg := float64(recentTotal) / float64(len(recent))
 
 	trendStr := t.Green.Render("→ steady")
-	if recentAvg > avg*1.2 { trendStr = t.AmberB.Render("↑ increasing") } else if recentAvg < avg*0.7 { trendStr = t.Dim.Render("↓ declining") }
+	if recentAvg > avg*1.2 {
+		trendStr = t.AmberB.Render("↑ increasing")
+	} else if recentAvg < avg*0.7 {
+		trendStr = t.Dim.Render("↓ declining")
+	}
 
-	b.WriteString(t.InsightInfo.Width(width-6).Render(
+	b.WriteString(t.InsightInfo.Width(width - 6).Render(
 		t.Blue.Render(fmt.Sprintf("total merges: %d   avg/mo: %.0f   recent avg: %.0f   trend: ", total, avg, recentAvg)) + trendStr,
 	))
 	b.WriteString("\n\n")
 
 	chartH := height - 12
-	if chartH < 4 { chartH = 4 }
-	if chartH > 16 { chartH = 16 }
+	if chartH < 4 {
+		chartH = 4
+	}
+	if chartH > 16 {
+		chartH = 16
+	}
 	colW := 6
 	maxCols := (width - 8) / colW
 	visible := data
-	if len(visible) > maxCols { visible = visible[len(visible)-maxCols:] }
+	if len(visible) > maxCols {
+		visible = visible[len(visible)-maxCols:]
+	}
 
 	for row := 0; row < chartH; row++ {
 		rowVal := float64(maxC) * float64(chartH-row) / float64(chartH)
@@ -715,7 +1006,13 @@ func renderMergeFreq(t *theme.Theme, data []git.MergeFreqEntry, err error, loadi
 			if chartH-row <= filled {
 				pct := float64(e.Count) / float64(maxC)
 				var colStyle lipgloss.Style
-				if pct > 0.75 { colStyle = t.RedB } else if pct > 0.4 { colStyle = t.Amber } else { colStyle = t.Blue }
+				if pct > 0.75 {
+					colStyle = t.RedB
+				} else if pct > 0.4 {
+					colStyle = t.Amber
+				} else {
+					colStyle = t.Blue
+				}
 				b.WriteString(colStyle.Render(" ████ "))
 			} else {
 				b.WriteString("      ")
@@ -723,7 +1020,7 @@ func renderMergeFreq(t *theme.Theme, data []git.MergeFreqEntry, err error, loadi
 		}
 		b.WriteString("\n")
 	}
-	b.WriteString(t.Muted.Render("       └" + strings.Repeat("──────", len(visible))) + "\n")
+	b.WriteString(t.Muted.Render("       └"+strings.Repeat("──────", len(visible))) + "\n")
 	b.WriteString("        ")
 	for _, e := range visible {
 		lbl := strings.Replace(e.Month[2:], "-", ".", 1)
@@ -743,8 +1040,14 @@ func renderFirefighting(t *theme.Theme, data []git.HotfixEntry, err error, loadi
 	var b strings.Builder
 	b.WriteString(t.CmdBlock.Width(width - 4).Render(cmdLine(t, git.FirefightCmd)))
 	b.WriteString("\n")
-	if loading { b.WriteString(t.Blue.Render("⟳ running git command…")); return b.String() }
-	if err != nil && len(data) == 0 { b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error())); return b.String() }
+	if loading {
+		b.WriteString(t.Blue.Render("⟳ running git command…"))
+		return b.String()
+	}
+	if err != nil && len(data) == 0 {
+		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
+		return b.String()
+	}
 
 	n := len(data)
 	var insightStyle lipgloss.Style
@@ -763,10 +1066,15 @@ func renderFirefighting(t *theme.Theme, data []git.HotfixEntry, err error, loadi
 	b.WriteString(insightStyle.Width(width - 6).Render(insightText))
 	b.WriteString("\n\n")
 
-	if len(data) == 0 { b.WriteString(t.Dim.Render("  (no results)")); return b.String() }
+	if len(data) == 0 {
+		b.WriteString(t.Dim.Render("  (no results)"))
+		return b.String()
+	}
 
 	msgW := width - 30
-	if msgW < 20 { msgW = 20 }
+	if msgW < 20 {
+		msgW = 20
+	}
 	b.WriteString("  " + t.TableHeader.Render(pad("HASH", 10)) + "  " +
 		t.TableHeader.Render(pad("TYPE", 12)) + "  " +
 		t.TableHeader.Render("MESSAGE") + "\n")
@@ -780,7 +1088,9 @@ func renderFirefighting(t *theme.Theme, data []git.HotfixEntry, err error, loadi
 	for i := scroll; i < len(data) && shown < height-8; i++ {
 		e := data[i]
 		kStyle, ok := kindColor[e.Kind]
-		if !ok { kStyle = t.Dim }
+		if !ok {
+			kStyle = t.Dim
+		}
 		b.WriteString("  " +
 			t.Blue.Render(pad(e.Hash, 10)) + "  " +
 			kStyle.Render(pad("["+e.Kind+"]", 12)) + "  " +
