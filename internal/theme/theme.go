@@ -153,7 +153,7 @@ func (t *Theme) apply() {
 		Background(c(p.Bg)).Foreground(c(p.Amber)).Bold(true).
 		PaddingLeft(1).PaddingRight(1).Underline(true)
 	t.TabInactive = lipgloss.NewStyle().
-		Background(c(p.Bg3)).Foreground(c(p.FgDim)).PaddingLeft(1).PaddingRight(1)
+		Background(c(p.Bg)).Foreground(c(p.FgDim)).PaddingLeft(1).PaddingRight(1)
 
 	t.StatusBar  = lipgloss.NewStyle().Background(c(p.Bg3)).Foreground(c(p.FgDim)).PaddingLeft(1)
 	t.StatusKey  = lipgloss.NewStyle().Background(c(p.Bg3)).Foreground(c(p.Blue)).Bold(true)
