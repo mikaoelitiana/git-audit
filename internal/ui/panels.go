@@ -346,8 +346,8 @@ func renderFirefighting(t *theme.Theme, data []git.HotfixEntry, err error, loadi
 	shown := 0
 	for i := scroll; i < len(data) && shown < height-8; i++ {
 		e := data[i]
-		kStyle := kindColor[e.Kind]
-		if (kStyle == lipgloss.Style{}) { kStyle = t.Dim }
+		kStyle, ok := kindColor[e.Kind]
+		if !ok { kStyle = t.Dim }
 		b.WriteString("  " +
 			t.Blue.Render(pad(e.Hash, 10)) + "  " +
 			kStyle.Render(pad("["+e.Kind+"]", 12)) + "  " +
