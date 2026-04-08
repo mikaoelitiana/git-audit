@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/term"
 )
 
 // ── VARIANT ───────────────────────────────────────────────────────────────────
@@ -248,6 +249,14 @@ func DetectVariant() Variant {
 		return detectFromEnv()
 	}
 	defer tty.Close()
+
+	// Switch to raw mode so the terminal's OSC 11 response is not echoed
+	// back to the screen as visible garbage characters.
+	oldState, err := term.MakeRaw(int(tty.Fd()))
+	if err != nil {
+		return detectFromEnv()
+	}
+	defer term.Restore(int(tty.Fd()), oldState) //nolint:errcheck
 
 	// OSC 11 — query background colour
 	if _, err := fmt.Fprint(tty, "\x1b]11;?\x07"); err != nil {
