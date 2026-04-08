@@ -136,10 +136,10 @@ func New(cwd string, v theme.Variant) Model {
 		sizeLoading:     true,
 		mergeLoading:    true,
 		churnFiles:      make(map[string]bool),
-		branch:       git.CurrentBranch(cwd),
-		totalCommits: git.TotalCommits(cwd),
-		spinner:      sp,
-		theme:        t,
+		branch:          git.CurrentBranch(cwd),
+		totalCommits:    git.TotalCommits(cwd),
+		spinner:         sp,
+		theme:           t,
 	}
 	return m
 }
@@ -181,7 +181,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.churnLoading = false
 		m.churnData, m.churnErr = msg.Data, msg.Err
 		m.churnFiles = make(map[string]bool)
-		for _, e := range m.churnData { m.churnFiles[e.File] = true }
+		for _, e := range m.churnData {
+			m.churnFiles[e.File] = true
+		}
 		return m, loadBugs(m.cwd, m.churnFiles)
 
 	case MsgBusFactorLoaded:
@@ -276,7 +278,9 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.scroll[m.activePanel]++
 
 	case "k", "up":
-		if m.scroll[m.activePanel] > 0 { m.scroll[m.activePanel]-- }
+		if m.scroll[m.activePanel] > 0 {
+			m.scroll[m.activePanel]--
+		}
 
 	case "g":
 		m.scroll[m.activePanel] = 0
@@ -288,26 +292,54 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.theme.Toggle()
 		m.spinner.Style = m.theme.Blue
 		label := "dark"
-		if m.theme.Variant == theme.Light { label = "light" }
+		if m.theme.Variant == theme.Light {
+			label = "light"
+		}
 		m.setStatus(fmt.Sprintf("theme: %s", label))
 
 	case "r":
 		m.scroll[m.activePanel] = 0
 		m.setStatus("re-running command…")
 		switch m.activePanel {
-		case PanelChurn:       m.churnLoading = true;    return m, loadChurn(m.cwd)
-		case PanelBusFactor:   m.busLoading = true;      return m, loadBusFactor(m.cwd)
-		case PanelBugs:        m.bugLoading = true;      return m, loadBugs(m.cwd, m.churnFiles)
-		case PanelVelocity:    m.velLoading = true;      return m, loadVelocity(m.cwd)
-		case PanelFirefight:   m.fireLoading = true;     return m, loadFirefight(m.cwd)
-		case PanelStale:       m.staleLoading = true;    return m, loadStale(m.cwd)
-		case PanelBranches:    m.branchLoading = true;   return m, loadBranches(m.cwd)
-		case PanelCoupling:    m.couplingLoading = true; return m, loadCoupling(m.cwd)
-		case PanelFresh:       m.freshLoading = true;    return m, loadFresh(m.cwd)
-		case PanelOwnership:   m.ownerLoading = true;    return m, loadOwnership(m.cwd)
-		case PanelTestRatio:   m.testLoading = true;     return m, loadTestRatio(m.cwd)
-		case PanelCommitSize:  m.sizeLoading = true;     return m, loadCommitSizes(m.cwd)
-		case PanelMergeFreq:   m.mergeLoading = true;    return m, loadMergeFreq(m.cwd)
+		case PanelChurn:
+			m.churnLoading = true
+			return m, loadChurn(m.cwd)
+		case PanelBusFactor:
+			m.busLoading = true
+			return m, loadBusFactor(m.cwd)
+		case PanelBugs:
+			m.bugLoading = true
+			return m, loadBugs(m.cwd, m.churnFiles)
+		case PanelVelocity:
+			m.velLoading = true
+			return m, loadVelocity(m.cwd)
+		case PanelFirefight:
+			m.fireLoading = true
+			return m, loadFirefight(m.cwd)
+		case PanelStale:
+			m.staleLoading = true
+			return m, loadStale(m.cwd)
+		case PanelBranches:
+			m.branchLoading = true
+			return m, loadBranches(m.cwd)
+		case PanelCoupling:
+			m.couplingLoading = true
+			return m, loadCoupling(m.cwd)
+		case PanelFresh:
+			m.freshLoading = true
+			return m, loadFresh(m.cwd)
+		case PanelOwnership:
+			m.ownerLoading = true
+			return m, loadOwnership(m.cwd)
+		case PanelTestRatio:
+			m.testLoading = true
+			return m, loadTestRatio(m.cwd)
+		case PanelCommitSize:
+			m.sizeLoading = true
+			return m, loadCommitSizes(m.cwd)
+		case PanelMergeFreq:
+			m.mergeLoading = true
+			return m, loadMergeFreq(m.cwd)
 		}
 
 	case "y":
@@ -354,7 +386,9 @@ func copyToClipboard(s string) error {
 		parts := strings.Fields(tool)
 		c := exec.Command(parts[0], parts[1:]...)
 		c.Stdin = strings.NewReader(s)
-		if err := c.Run(); err == nil { return nil }
+		if err := c.Run(); err == nil {
+			return nil
+		}
 	}
 	return fmt.Errorf("no clipboard tool found")
 }
@@ -362,8 +396,12 @@ func copyToClipboard(s string) error {
 // ── VIEW ──────────────────────────────────────────────────────────────────────
 
 func (m Model) View() string {
-	if m.width == 0 { return "loading…" }
-	if m.width < 60 || m.height < 18 { return "Terminal too small — resize to at least 60×18\n" }
+	if m.width == 0 {
+		return "loading…"
+	}
+	if m.width < 60 || m.height < 18 {
+		return "Terminal too small — resize to at least 60×18\n"
+	}
 
 	var b strings.Builder
 	b.WriteString(m.titleBar())
@@ -381,7 +419,9 @@ func (m Model) titleBar() string {
 
 	// Theme indicator badge
 	themeIcon := "🌙"
-	if m.theme.Variant == theme.Light { themeIcon = "☀" }
+	if m.theme.Variant == theme.Light {
+		themeIcon = "☀"
+	}
 	themeBadge := t.Dim.Render(fmt.Sprintf(" %s ", themeIcon))
 
 	var tabs strings.Builder
@@ -398,7 +438,9 @@ func (m Model) titleBar() string {
 		} else {
 			tabs.WriteString(t.TabInactive.Render(label))
 		}
-		if i < numPanels-1 { tabs.WriteString(t.Muted.Render("│")) }
+		if i < numPanels-1 {
+			tabs.WriteString(t.Muted.Render("│"))
+		}
 	}
 
 	right := t.TitleBar.Render(
@@ -408,12 +450,14 @@ func (m Model) titleBar() string {
 	)
 
 	tabStr := tabs.String()
-	appW   := lipgloss.Width(appTitle)
-	tabW   := lipgloss.Width(tabStr)
+	appW := lipgloss.Width(appTitle)
+	tabW := lipgloss.Width(tabStr)
 	rightW := lipgloss.Width(right)
 	badgeW := lipgloss.Width(themeBadge)
-	fill   := m.width - appW - tabW - rightW - badgeW - 1
-	if fill < 0 { fill = 0 }
+	fill := m.width - appW - tabW - rightW - badgeW - 1
+	if fill < 0 {
+		fill = 0
+	}
 	gap := lipgloss.NewStyle().Background(lipgloss.Color(t.P.Bg3)).Render(strings.Repeat(" ", fill))
 
 	return appTitle + tabStr + gap + themeBadge + right
@@ -425,11 +469,11 @@ func (m Model) body() string {
 	t := m.theme
 	sidebarW := 26
 	contentW := m.width - sidebarW - 1
-	bodyH    := m.height - 2
+	bodyH := m.height - 2
 
-	sidebar  := m.sidebar(sidebarW, bodyH)
-	content  := m.panelContent(contentW, bodyH)
-	divCol   := t.Muted.Render(strings.Repeat("│\n", bodyH))
+	sidebar := m.sidebar(sidebarW, bodyH)
+	content := m.panelContent(contentW, bodyH)
+	divCol := t.Muted.Render(strings.Repeat("│\n", bodyH))
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, sidebar, divCol, content)
 }
@@ -459,25 +503,31 @@ func (m Model) sidebar(w, h int) string {
 
 		var dotChar string
 		switch {
-		case loadingOf(i): dotChar = "⟳"
-		case errOf(i):     dotChar = "✗"
-		default:           dotChar = "●"
+		case loadingOf(i):
+			dotChar = "⟳"
+		case errOf(i):
+			dotChar = "✗"
+		default:
+			dotChar = "●"
 		}
 
 		var label string
 		if isActive {
 			// Plain text only — no inner ANSI sequences that would reset the
 			// outer background mid-row.
-			label = fmt.Sprintf(" %d %s %s  %s", i+1, panelIcons[i], theme.Truncate(panelTitles[i], w-8), dotChar)
+			label = fmt.Sprintf(" %d %s  %s %s", i+1, panelIcons[i], theme.Truncate(panelTitles[i], w-8), dotChar)
 		} else {
 			num := t.BlueB.Render(fmt.Sprintf("%d", i+1))
 			var dot string
 			switch {
-			case loadingOf(i): dot = t.Amber.Render(dotChar)
-			case errOf(i):     dot = t.Red.Render(dotChar)
-			default:           dot = t.Green.Render(dotChar)
+			case loadingOf(i):
+				dot = t.Amber.Render(dotChar)
+			case errOf(i):
+				dot = t.Red.Render(dotChar)
+			default:
+				dot = t.Green.Render(dotChar)
 			}
-			label = fmt.Sprintf(" %s %s %s  %s", num, panelIcons[i], theme.Truncate(panelTitles[i], w-8), dot)
+			label = fmt.Sprintf(" %s %s  %s %s", num, panelIcons[i], theme.Truncate(panelTitles[i], w-8), dot)
 		}
 
 		var style lipgloss.Style
@@ -510,19 +560,32 @@ func (m Model) panelContent(w, h int) string {
 	var content string
 
 	switch m.activePanel {
-	case PanelChurn:      content = renderChurn(t, m.churnData, m.churnErr, m.churnLoading, scroll, w, h)
-	case PanelBusFactor:  content = renderBusFactor(t, m.busData, m.busErr, m.busLoading, scroll, w, h)
-	case PanelBugs:       content = renderBugs(t, m.bugData, m.bugErr, m.bugLoading, scroll, w, h)
-	case PanelVelocity:   content = renderVelocity(t, m.velData, m.velErr, m.velLoading, w, h)
-	case PanelFirefight:  content = renderFirefighting(t, m.fireData, m.fireErr, m.fireLoading, scroll, w, h)
-	case PanelStale:      content = renderStale(t, m.staleData, m.staleErr, m.staleLoading, scroll, w, h)
-	case PanelBranches:   content = renderBranches(t, m.branchData, m.branchErr, m.branchLoading, scroll, w, h)
-	case PanelCoupling:   content = renderCoupling(t, m.couplingData, m.couplingErr, m.couplingLoading, scroll, w, h)
-	case PanelFresh:      content = renderFresh(t, m.freshData, m.freshErr, m.freshLoading, scroll, w, h)
-	case PanelOwnership:  content = renderOwnership(t, m.ownerData, m.ownerErr, m.ownerLoading, scroll, w, h)
-	case PanelTestRatio:  content = renderTestRatio(t, m.testData, m.testErr, m.testLoading, scroll, w, h)
-	case PanelCommitSize: content = renderCommitSizes(t, m.sizeData, m.sizeErr, m.sizeLoading, w, h)
-	case PanelMergeFreq:  content = renderMergeFreq(t, m.mergeData, m.mergeErr, m.mergeLoading, w, h)
+	case PanelChurn:
+		content = renderChurn(t, m.churnData, m.churnErr, m.churnLoading, scroll, w, h)
+	case PanelBusFactor:
+		content = renderBusFactor(t, m.busData, m.busErr, m.busLoading, scroll, w, h)
+	case PanelBugs:
+		content = renderBugs(t, m.bugData, m.bugErr, m.bugLoading, scroll, w, h)
+	case PanelVelocity:
+		content = renderVelocity(t, m.velData, m.velErr, m.velLoading, w, h)
+	case PanelFirefight:
+		content = renderFirefighting(t, m.fireData, m.fireErr, m.fireLoading, scroll, w, h)
+	case PanelStale:
+		content = renderStale(t, m.staleData, m.staleErr, m.staleLoading, scroll, w, h)
+	case PanelBranches:
+		content = renderBranches(t, m.branchData, m.branchErr, m.branchLoading, scroll, w, h)
+	case PanelCoupling:
+		content = renderCoupling(t, m.couplingData, m.couplingErr, m.couplingLoading, scroll, w, h)
+	case PanelFresh:
+		content = renderFresh(t, m.freshData, m.freshErr, m.freshLoading, scroll, w, h)
+	case PanelOwnership:
+		content = renderOwnership(t, m.ownerData, m.ownerErr, m.ownerLoading, scroll, w, h)
+	case PanelTestRatio:
+		content = renderTestRatio(t, m.testData, m.testErr, m.testLoading, scroll, w, h)
+	case PanelCommitSize:
+		content = renderCommitSizes(t, m.sizeData, m.sizeErr, m.sizeLoading, w, h)
+	case PanelMergeFreq:
+		content = renderMergeFreq(t, m.mergeData, m.mergeErr, m.mergeLoading, w, h)
 	}
 
 	title := t.BlueB.Render("  ── ") + t.AmberB.Render(panelTitles[m.activePanel]) + t.Muted.Render(" ──")
@@ -544,9 +607,11 @@ func (m Model) statusBar() string {
 
 	right := t.StatusKey.Render(fmt.Sprintf(" git-audit v1.0 [%s] ", m.theme.Variant))
 	rightW := lipgloss.Width(right)
-	modeW  := lipgloss.Width(mode)
-	msgW   := m.width - modeW - rightW - 1
-	if msgW < 0 { msgW = 0 }
+	modeW := lipgloss.Width(mode)
+	msgW := m.width - modeW - rightW - 1
+	if msgW < 0 {
+		msgW = 0
+	}
 
 	msgStyled := lipgloss.NewStyle().
 		Background(lipgloss.Color(t.P.Bg3)).
