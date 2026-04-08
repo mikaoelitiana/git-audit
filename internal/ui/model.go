@@ -423,7 +423,7 @@ func (m Model) titleBar() string {
 
 func (m Model) body() string {
 	t := m.theme
-	sidebarW := 20
+	sidebarW := 26
 	contentW := m.width - sidebarW - 1
 	bodyH    := m.height - 2
 
@@ -455,18 +455,33 @@ func (m Model) sidebar(w, h int) string {
 
 	b.WriteString("\n")
 	for i := 0; i < numPanels; i++ {
-		var dot string
+		isActive := i == m.activePanel
+
+		var dotChar string
 		switch {
-		case loadingOf(i): dot = t.Amber.Render("⟳")
-		case errOf(i):     dot = t.Red.Render("✗")
-		default:           dot = t.Green.Render("●")
+		case loadingOf(i): dotChar = "⟳"
+		case errOf(i):     dotChar = "✗"
+		default:           dotChar = "●"
 		}
 
-		num   := t.BlueB.Render(fmt.Sprintf("%d", i+1))
-		label := fmt.Sprintf(" %s %s %s  %s", num, panelIcons[i], theme.Truncate(panelTitles[i], w-8), dot)
+		var label string
+		if isActive {
+			// Plain text only — no inner ANSI sequences that would reset the
+			// outer background mid-row.
+			label = fmt.Sprintf(" %d %s %s  %s", i+1, panelIcons[i], theme.Truncate(panelTitles[i], w-8), dotChar)
+		} else {
+			num := t.BlueB.Render(fmt.Sprintf("%d", i+1))
+			var dot string
+			switch {
+			case loadingOf(i): dot = t.Amber.Render(dotChar)
+			case errOf(i):     dot = t.Red.Render(dotChar)
+			default:           dot = t.Green.Render(dotChar)
+			}
+			label = fmt.Sprintf(" %s %s %s  %s", num, panelIcons[i], theme.Truncate(panelTitles[i], w-8), dot)
+		}
 
 		var style lipgloss.Style
-		if i == m.activePanel {
+		if isActive {
 			style = lipgloss.NewStyle().
 				Background(lipgloss.Color(t.P.Bg3)).
 				Foreground(lipgloss.Color(t.P.Amber)).

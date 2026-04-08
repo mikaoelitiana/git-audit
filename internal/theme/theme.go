@@ -165,7 +165,7 @@ func (t *Theme) apply() {
 	t.TableHeader = lipgloss.NewStyle().Foreground(c(p.FgMuted)).Bold(true)
 
 	t.CmdBlock = lipgloss.NewStyle().
-		Background(c(p.Bg2)).Foreground(c(p.Amber)).
+		Foreground(c(p.Amber)).
 		PaddingLeft(1).PaddingRight(1).
 		Border(lipgloss.RoundedBorder()).BorderForeground(c(p.Border))
 	t.CmdPrompt  = lipgloss.NewStyle().Foreground(c(p.FgMuted))
