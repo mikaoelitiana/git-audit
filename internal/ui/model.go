@@ -21,11 +21,23 @@ const (
 	PanelBugs
 	PanelVelocity
 	PanelFirefight
+	PanelStale
+	PanelBranches
+	PanelCoupling
+	PanelFresh
+	PanelOwnership
+	PanelTestRatio
+	PanelCommitSize
+	PanelMergeFreq
 	numPanels
 )
 
-var panelTitles = [numPanels]string{"Churn Hotspots", "Bus Factor", "Bug Clusters", "Velocity", "Firefighting"}
-var panelIcons  = [numPanels]string{"⬆", "◉", "⬡", "~", "!"}
+var panelTitles = [numPanels]string{
+	"Churn Hotspots", "Bus Factor", "Bug Clusters", "Velocity", "Firefighting",
+	"Stale Files", "Long Branches", "Co-change", "Fresh Files",
+	"Ownership Drift", "Test Ratio", "Commit Sizes", "Merge Freq",
+}
+var panelIcons = [numPanels]string{"⬆", "◉", "⬡", "~", "!", "⧖", "⌥", "⊕", "✦", "⤵", "⌗", "∑", "⊗"}
 
 // ── MODEL ─────────────────────────────────────────────────────────────────────
 
@@ -58,6 +70,38 @@ type Model struct {
 	fireErr     error
 	fireLoading bool
 
+	staleData    []git.StaleEntry
+	staleErr     error
+	staleLoading bool
+
+	branchData    []git.BranchEntry
+	branchErr     error
+	branchLoading bool
+
+	couplingData    []git.CouplingEntry
+	couplingErr     error
+	couplingLoading bool
+
+	freshData    []git.FreshEntry
+	freshErr     error
+	freshLoading bool
+
+	ownerData    []git.OwnershipEntry
+	ownerErr     error
+	ownerLoading bool
+
+	testData    []git.TestRatioEntry
+	testErr     error
+	testLoading bool
+
+	sizeData    []git.CommitSizeBucket
+	sizeErr     error
+	sizeLoading bool
+
+	mergeData    []git.MergeFreqEntry
+	mergeErr     error
+	mergeLoading bool
+
 	branch       string
 	totalCommits int
 
@@ -77,13 +121,21 @@ func New(cwd string, v theme.Variant) Model {
 	sp.Style = t.Blue
 
 	m := Model{
-		cwd:          cwd,
-		churnLoading: true,
-		busLoading:   true,
-		bugLoading:   true,
-		velLoading:   true,
-		fireLoading:  true,
-		churnFiles:   make(map[string]bool),
+		cwd:             cwd,
+		churnLoading:    true,
+		busLoading:      true,
+		bugLoading:      true,
+		velLoading:      true,
+		fireLoading:     true,
+		staleLoading:    true,
+		branchLoading:   true,
+		couplingLoading: true,
+		freshLoading:    true,
+		ownerLoading:    true,
+		testLoading:     true,
+		sizeLoading:     true,
+		mergeLoading:    true,
+		churnFiles:      make(map[string]bool),
 		branch:       git.CurrentBranch(cwd),
 		totalCommits: git.TotalCommits(cwd),
 		spinner:      sp,
@@ -101,6 +153,14 @@ func (m Model) Init() tea.Cmd {
 		loadBusFactor(m.cwd),
 		loadVelocity(m.cwd),
 		loadFirefight(m.cwd),
+		loadStale(m.cwd),
+		loadBranches(m.cwd),
+		loadCoupling(m.cwd),
+		loadFresh(m.cwd),
+		loadOwnership(m.cwd),
+		loadTestRatio(m.cwd),
+		loadCommitSizes(m.cwd),
+		loadMergeFreq(m.cwd),
 	)
 }
 
@@ -144,6 +204,46 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fireData, m.fireErr = msg.Data, msg.Err
 		return m, nil
 
+	case MsgStaleLoaded:
+		m.staleLoading = false
+		m.staleData, m.staleErr = msg.Data, msg.Err
+		return m, nil
+
+	case MsgBranchesLoaded:
+		m.branchLoading = false
+		m.branchData, m.branchErr = msg.Data, msg.Err
+		return m, nil
+
+	case MsgCouplingLoaded:
+		m.couplingLoading = false
+		m.couplingData, m.couplingErr = msg.Data, msg.Err
+		return m, nil
+
+	case MsgFreshLoaded:
+		m.freshLoading = false
+		m.freshData, m.freshErr = msg.Data, msg.Err
+		return m, nil
+
+	case MsgOwnershipLoaded:
+		m.ownerLoading = false
+		m.ownerData, m.ownerErr = msg.Data, msg.Err
+		return m, nil
+
+	case MsgTestRatioLoaded:
+		m.testLoading = false
+		m.testData, m.testErr = msg.Data, msg.Err
+		return m, nil
+
+	case MsgCommitSizesLoaded:
+		m.sizeLoading = false
+		m.sizeData, m.sizeErr = msg.Data, msg.Err
+		return m, nil
+
+	case MsgMergeFreqLoaded:
+		m.mergeLoading = false
+		m.mergeData, m.mergeErr = msg.Data, msg.Err
+		return m, nil
+
 	case MsgStatusClear:
 		m.statusMsg = ""
 		return m, nil
@@ -159,8 +259,12 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "q", "ctrl+c":
 		return m, tea.Quit
 
-	case "1", "2", "3", "4", "5":
-		m.activePanel = int(msg.String()[0]-'1')
+	case "1", "2", "3", "4", "5", "6", "7", "8", "9":
+		m.activePanel = int(msg.String()[0] - '1')
+	case "0":
+		if numPanels > 9 {
+			m.activePanel = 9
+		}
 
 	case "tab", "l", "right":
 		m.activePanel = (m.activePanel + 1) % numPanels
@@ -191,11 +295,19 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.scroll[m.activePanel] = 0
 		m.setStatus("re-running command…")
 		switch m.activePanel {
-		case PanelChurn:      m.churnLoading = true; return m, loadChurn(m.cwd)
-		case PanelBusFactor:  m.busLoading = true;   return m, loadBusFactor(m.cwd)
-		case PanelBugs:       m.bugLoading = true;   return m, loadBugs(m.cwd, m.churnFiles)
-		case PanelVelocity:   m.velLoading = true;   return m, loadVelocity(m.cwd)
-		case PanelFirefight:  m.fireLoading = true;  return m, loadFirefight(m.cwd)
+		case PanelChurn:       m.churnLoading = true;    return m, loadChurn(m.cwd)
+		case PanelBusFactor:   m.busLoading = true;      return m, loadBusFactor(m.cwd)
+		case PanelBugs:        m.bugLoading = true;      return m, loadBugs(m.cwd, m.churnFiles)
+		case PanelVelocity:    m.velLoading = true;      return m, loadVelocity(m.cwd)
+		case PanelFirefight:   m.fireLoading = true;     return m, loadFirefight(m.cwd)
+		case PanelStale:       m.staleLoading = true;    return m, loadStale(m.cwd)
+		case PanelBranches:    m.branchLoading = true;   return m, loadBranches(m.cwd)
+		case PanelCoupling:    m.couplingLoading = true; return m, loadCoupling(m.cwd)
+		case PanelFresh:       m.freshLoading = true;    return m, loadFresh(m.cwd)
+		case PanelOwnership:   m.ownerLoading = true;    return m, loadOwnership(m.cwd)
+		case PanelTestRatio:   m.testLoading = true;     return m, loadTestRatio(m.cwd)
+		case PanelCommitSize:  m.sizeLoading = true;     return m, loadCommitSizes(m.cwd)
+		case PanelMergeFreq:   m.mergeLoading = true;    return m, loadMergeFreq(m.cwd)
 		}
 
 	case "y":
@@ -225,6 +337,14 @@ func panelCmd(panel int) (string, string) {
 		{"Bug Clusters", git.BugCmd},
 		{"Velocity", git.VelocityCmd},
 		{"Firefighting", git.FirefightCmd},
+		{"Stale Files", git.StaleLogCmd},
+		{"Long Branches", git.BranchListCmd},
+		{"Co-change Coupling", git.CoChangeCmd},
+		{"Fresh Files", git.FreshCmd},
+		{"Ownership Drift", git.OwnerNewCmd},
+		{"Test Ratio", git.TestRatioCmd},
+		{"Commit Sizes", git.CommitSizeCmd},
+		{"Merge Frequency", git.MergeFreqCmd},
 	}
 	return cmds[panel][0], cmds[panel][1]
 }
@@ -266,7 +386,13 @@ func (m Model) titleBar() string {
 
 	var tabs strings.Builder
 	for i := 0; i < numPanels; i++ {
-		label := fmt.Sprintf(" %d:%s ", i+1, panelTitles[i])
+		key := fmt.Sprintf("%d", i+1)
+		if i == 9 {
+			key = "0"
+		} else if i > 9 {
+			key = fmt.Sprintf("+%d", i-9)
+		}
+		label := fmt.Sprintf(" %s:%s ", key, panelIcons[i])
 		if i == m.activePanel {
 			tabs.WriteString(t.TabActive.Render(label))
 		} else {
@@ -313,10 +439,18 @@ func (m Model) sidebar(w, h int) string {
 	var b strings.Builder
 
 	loadingOf := func(p int) bool {
-		return [numPanels]bool{m.churnLoading, m.busLoading, m.bugLoading, m.velLoading, m.fireLoading}[p]
+		return [numPanels]bool{
+			m.churnLoading, m.busLoading, m.bugLoading, m.velLoading, m.fireLoading,
+			m.staleLoading, m.branchLoading, m.couplingLoading, m.freshLoading,
+			m.ownerLoading, m.testLoading, m.sizeLoading, m.mergeLoading,
+		}[p]
 	}
 	errOf := func(p int) bool {
-		return ([numPanels]error{m.churnErr, m.busErr, m.bugErr, m.velErr, m.fireErr})[p] != nil
+		return ([numPanels]error{
+			m.churnErr, m.busErr, m.bugErr, m.velErr, m.fireErr,
+			m.staleErr, m.branchErr, m.couplingErr, m.freshErr,
+			m.ownerErr, m.testErr, m.sizeErr, m.mergeErr,
+		})[p] != nil
 	}
 
 	b.WriteString("\n")
@@ -361,11 +495,19 @@ func (m Model) panelContent(w, h int) string {
 	var content string
 
 	switch m.activePanel {
-	case PanelChurn:     content = renderChurn(t, m.churnData, m.churnErr, m.churnLoading, scroll, w, h)
-	case PanelBusFactor: content = renderBusFactor(t, m.busData, m.busErr, m.busLoading, scroll, w, h)
-	case PanelBugs:      content = renderBugs(t, m.bugData, m.bugErr, m.bugLoading, scroll, w, h)
-	case PanelVelocity:  content = renderVelocity(t, m.velData, m.velErr, m.velLoading, w, h)
-	case PanelFirefight: content = renderFirefighting(t, m.fireData, m.fireErr, m.fireLoading, scroll, w, h)
+	case PanelChurn:      content = renderChurn(t, m.churnData, m.churnErr, m.churnLoading, scroll, w, h)
+	case PanelBusFactor:  content = renderBusFactor(t, m.busData, m.busErr, m.busLoading, scroll, w, h)
+	case PanelBugs:       content = renderBugs(t, m.bugData, m.bugErr, m.bugLoading, scroll, w, h)
+	case PanelVelocity:   content = renderVelocity(t, m.velData, m.velErr, m.velLoading, w, h)
+	case PanelFirefight:  content = renderFirefighting(t, m.fireData, m.fireErr, m.fireLoading, scroll, w, h)
+	case PanelStale:      content = renderStale(t, m.staleData, m.staleErr, m.staleLoading, scroll, w, h)
+	case PanelBranches:   content = renderBranches(t, m.branchData, m.branchErr, m.branchLoading, scroll, w, h)
+	case PanelCoupling:   content = renderCoupling(t, m.couplingData, m.couplingErr, m.couplingLoading, scroll, w, h)
+	case PanelFresh:      content = renderFresh(t, m.freshData, m.freshErr, m.freshLoading, scroll, w, h)
+	case PanelOwnership:  content = renderOwnership(t, m.ownerData, m.ownerErr, m.ownerLoading, scroll, w, h)
+	case PanelTestRatio:  content = renderTestRatio(t, m.testData, m.testErr, m.testLoading, scroll, w, h)
+	case PanelCommitSize: content = renderCommitSizes(t, m.sizeData, m.sizeErr, m.sizeLoading, w, h)
+	case PanelMergeFreq:  content = renderMergeFreq(t, m.mergeData, m.mergeErr, m.mergeLoading, w, h)
 	}
 
 	title := t.BlueB.Render("  ── ") + t.AmberB.Render(panelTitles[m.activePanel]) + t.Muted.Render(" ──")
