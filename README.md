@@ -5,29 +5,7 @@ Runs the 5 git commands from [piechowski.io/post/git-commands-before-reading-cod
 
 Built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Lip Gloss](https://github.com/charmbracelet/lipgloss).
 
-```
-┌ git-audit ─────────────────────────────────────────────────────────────────┐
-│ 1:Churn Hotspots │ 2:Bus Factor │ 3:Bug Clusters │ 4:Velocity │ 5:Firefight│
-├────────────────────────────────────────────────────────────────────────────┤
-│ 1 ⬆ Churn ●   ║  ── Churn Hotspots ──                                     │
-│               ║  $ git log --format=format: --name-only ...                │
-│ 2 ◉ Bus ●     ║                                                            │
-│               ║  ▲ insight  High churn files — cross-reference with bugs   │
-│ 3 ⬡ Bugs ●   ║                                                            │
-│               ║  #   FILE                        CHANGES  CHURN     RISK   │
-│ 4 ~ Velocity ●║  ──────────────────────────────────────────────────────── │
-│               ║  1   src/auth/session.ts             187  ████████  crit  │
-│ 5 ! Fire ●    ║  2   api/payments.rb                 162  ███████   crit  │
-│               ║  3   app/components/Dashboard.tsx    134  █████░░   high  │
-│ j/k  scroll   ║                                                            │
-│ Tab  panel    ║                                                            │
-│ r    reload   ║                                                            │
-│ y    copy cmd ║                                                            │
-│ q    quit     ║                                                            │
-├────────────────────────────────────────────────────────────────────────────┤
-│ NORMAL   /path/to/repo                              git-audit v1.0        │
-└────────────────────────────────────────────────────────────────────────────┘
-```
+![git-audit screenshot](docs/screenshot.png)
 
 ## Development
 
