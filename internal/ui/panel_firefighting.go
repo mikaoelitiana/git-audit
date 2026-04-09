@@ -17,7 +17,7 @@ func renderFirefighting(t *theme.Theme, data []git.HotfixEntry, err error, loadi
 		b.WriteString(t.Blue.Render("⟳ running git command…"))
 		return b.String()
 	}
-	if err != nil && len(data) == 0 {
+	if err != nil {
 		b.WriteString(t.RedB.Render("✗ error: ") + t.Dim.Render(err.Error()))
 		return b.String()
 	}
