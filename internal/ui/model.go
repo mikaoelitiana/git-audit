@@ -473,7 +473,7 @@ func (m Model) body() string {
 
 	sidebar := m.sidebar(sidebarW, bodyH)
 	content := m.panelContent(contentW, bodyH)
-	divCol := t.Muted.Render(strings.Repeat("│\n", bodyH))
+	divCol := t.Muted.Render("│" + strings.Repeat("\n│", bodyH-1))
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, sidebar, divCol, content)
 }

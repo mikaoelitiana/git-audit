@@ -644,7 +644,7 @@ func renderFresh(t *theme.Theme, data []git.FreshEntry, err error, loading bool,
 	b.WriteString("  " + divider(t, width-4) + "\n")
 
 	shown := 0
-	for i := scroll; i < len(data) && shown < height-8; i++ {
+	for i := scroll; i < len(data) && shown < height-11; i++ {
 		e := data[i]
 		ageStyle := t.GreenB
 		if e.DaysAgo > 60 {
