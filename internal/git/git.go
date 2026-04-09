@@ -144,8 +144,8 @@ func Churn(cwd string) ([]ChurnEntry, error) {
 
 // ── COMMAND 2: BUS FACTOR ────────────────────────────────────────────────────
 
-const BusFactorCmd = `git shortlog -sn --no-merges`
-const BusFactorRecentCmd = `git shortlog -sn --no-merges --since="6 months ago"`
+const BusFactorCmd = `git shortlog -sn --no-merges HEAD`
+const BusFactorRecentCmd = `git shortlog -sn --no-merges --since="6 months ago" HEAD`
 
 func BusFactor(cwd string) ([]Contributor, error) {
 	lines, err := runIn(cwd, BusFactorCmd)
