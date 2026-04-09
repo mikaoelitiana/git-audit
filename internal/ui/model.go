@@ -288,15 +288,6 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "G":
 		m.scroll[m.activePanel] = 9999
 
-	case "T", "t":
-		m.theme.Toggle()
-		m.spinner.Style = m.theme.Blue
-		label := "dark"
-		if m.theme.Variant == theme.Light {
-			label = "light"
-		}
-		m.setStatus(fmt.Sprintf("theme: %s", label))
-
 	case "r":
 		m.scroll[m.activePanel] = 0
 		m.setStatus("re-running command…")
@@ -546,7 +537,7 @@ func (m Model) sidebar(w, h int) string {
 	remaining := h - numPanels*2 - 2
 	if remaining > 7 {
 		b.WriteString(strings.Repeat("\n", remaining-7))
-		hints := [][2]string{{"j/k", "scroll"}, {"Tab", "panel"}, {"r", "reload"}, {"y", "copy cmd"}, {"T", "toggle theme"}, {"q", "quit"}}
+		hints := [][2]string{{"j/k", "scroll"}, {"Tab", "panel"}, {"r", "reload"}, {"y", "copy cmd"}, {"q", "quit"}}
 		for _, kv := range hints {
 			b.WriteString(t.BlueB.Render(fmt.Sprintf(" %-4s", kv[0])) + t.Muted.Render(" "+kv[1]) + "\n")
 		}
