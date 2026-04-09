@@ -42,7 +42,7 @@ func renderBranches(t *theme.Theme, data []git.BranchEntry, err error, loading b
 		insightStyle = t.InsightOk
 		insightText = t.GreenB.Render("✓  ") + t.Green.Render("All branches are recent — good branch hygiene.")
 	}
-	b.WriteString(insightStyle.Width(width - 6).Render(insightText))
+	b.WriteString(insightStyle.Width(width - 4).Render(insightText))
 	b.WriteString("\n\n")
 
 	nameW := width - 44

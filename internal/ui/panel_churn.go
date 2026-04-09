@@ -25,7 +25,7 @@ func renderChurn(t *theme.Theme, data []git.ChurnEntry, err error, loading bool,
 		return b.String()
 	}
 
-	b.WriteString(t.InsightWarn.Width(width - 6).Render(
+	b.WriteString(t.InsightWarn.Width(width - 4).Render(
 		t.AmberB.Render("▲ insight  ") +
 			t.Amber.Render("High churn ≠ bad. But a file in both churn and bug lists is patch-on-patch territory — your highest risk."),
 	))

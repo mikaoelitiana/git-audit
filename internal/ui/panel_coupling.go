@@ -21,10 +21,10 @@ func renderCoupling(t *theme.Theme, data []git.CouplingEntry, err error, loading
 		return b.String()
 	}
 	if len(data) == 0 {
-		b.WriteString(t.InsightOk.Width(width - 6).Render(t.GreenB.Render("✓  ") + t.Green.Render("No strong coupling detected (no pair changed together ≥3 times).")))
+		b.WriteString(t.InsightOk.Width(width - 4).Render(t.GreenB.Render("✓  ") + t.Green.Render("No strong coupling detected (no pair changed together ≥3 times).")))
 		return b.String()
 	}
-	b.WriteString(t.InsightWarn.Width(width - 6).Render(
+	b.WriteString(t.InsightWarn.Width(width - 4).Render(
 		t.AmberB.Render("▲ insight  ") +
 			t.Amber.Render("These file pairs are always committed together — hidden coupling, consider extracting shared logic."),
 	))

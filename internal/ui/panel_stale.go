@@ -21,10 +21,10 @@ func renderStale(t *theme.Theme, data []git.StaleEntry, err error, loading bool,
 		return b.String()
 	}
 	if len(data) == 0 {
-		b.WriteString(t.InsightOk.Width(width - 6).Render(t.GreenB.Render("✓  ") + t.Green.Render("No stale files — everything touched in the last year.")))
+		b.WriteString(t.InsightOk.Width(width - 4).Render(t.GreenB.Render("✓  ") + t.Green.Render("No stale files — everything touched in the last year.")))
 		return b.String()
 	}
-	b.WriteString(t.InsightWarn.Width(width - 6).Render(
+	b.WriteString(t.InsightWarn.Width(width - 4).Render(
 		t.AmberB.Render("▲ insight  ") +
 			t.Amber.Render(fmt.Sprintf("%d file(s) untouched for 1+ year — candidates for deletion or archival.", len(data))),
 	))

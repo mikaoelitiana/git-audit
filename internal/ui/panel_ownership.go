@@ -22,7 +22,7 @@ func renderOwnership(t *theme.Theme, data []git.OwnershipEntry, err error, loadi
 		return b.String()
 	}
 	if len(data) == 0 {
-		b.WriteString(t.InsightOk.Width(width - 6).Render(t.GreenB.Render("✓  ") + t.Green.Render("No ownership changes detected.")))
+		b.WriteString(t.InsightOk.Width(width - 4).Render(t.GreenB.Render("✓  ") + t.Green.Render("No ownership changes detected.")))
 		return b.String()
 	}
 
@@ -42,7 +42,7 @@ func renderOwnership(t *theme.Theme, data []git.OwnershipEntry, err error, loadi
 		insightStyle = t.InsightOk
 		insightText = t.GreenB.Render("✓  ") + t.Green.Render("No ownership drift — stable authorship.")
 	}
-	b.WriteString(insightStyle.Width(width - 6).Render(insightText))
+	b.WriteString(insightStyle.Width(width - 4).Render(insightText))
 	b.WriteString("\n\n")
 
 	fileW := (width - 46) / 2

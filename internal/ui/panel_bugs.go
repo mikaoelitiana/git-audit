@@ -43,7 +43,7 @@ func renderBugs(t *theme.Theme, data []git.BugEntry, err error, loading bool, sc
 		insightStyle = t.InsightOk
 		insightText = t.GreenB.Render("✓  ") + t.Green.Render("No overlap with churn hotspots.")
 	}
-	b.WriteString(insightStyle.Width(width - 6).Render(insightText))
+	b.WriteString(insightStyle.Width(width - 4).Render(insightText))
 	b.WriteString("\n\n")
 
 	fileW := width - 46

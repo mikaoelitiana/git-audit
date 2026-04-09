@@ -49,7 +49,7 @@ func renderBusFactor(t *theme.Theme, data []git.Contributor, err error, loading 
 		insightText = t.GreenB.Render("✓  ") +
 			t.Green.Render(fmt.Sprintf("Bus factor OK. %d active contributors in last 6 months.", activeCount))
 	}
-	b.WriteString(insightStyle.Width(width - 6).Render(insightText))
+	b.WriteString(insightStyle.Width(width - 4).Render(insightText))
 	b.WriteString("\n\n")
 
 	nameW := width - 52

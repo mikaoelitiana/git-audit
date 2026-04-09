@@ -26,7 +26,7 @@ func renderFresh(t *theme.Theme, data []git.FreshEntry, err error, loading bool,
 		return b.String()
 	}
 
-	b.WriteString(t.InsightInfo.Width(width - 6).Render(
+	b.WriteString(t.InsightInfo.Width(width - 4).Render(
 		t.Blue.Render(fmt.Sprintf("ℹ  %d new file(s) added in the last 90 days — onboarding surface area.", len(data))),
 	))
 	b.WriteString("\n\n")

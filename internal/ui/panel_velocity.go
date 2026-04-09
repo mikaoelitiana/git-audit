@@ -52,7 +52,7 @@ func renderVelocity(t *theme.Theme, data []git.VelocityEntry, err error, loading
 		trendStr = t.RedB.Render("↓ declining")
 	}
 
-	b.WriteString(t.InsightInfo.Width(width - 6).Render(
+	b.WriteString(t.InsightInfo.Width(width - 4).Render(
 		t.Blue.Render(fmt.Sprintf("avg: %.0f/mo   recent avg: %.0f/mo   trend: ", avg, recentAvg)) + trendStr,
 	))
 	b.WriteString("\n\n")

@@ -46,7 +46,7 @@ func renderCommitSizes(t *theme.Theme, data []git.CommitSizeBucket, err error, l
 		insightStyle = t.InsightOk
 		insightText = t.GreenB.Render("✓  ") + t.Green.Render(fmt.Sprintf("%d commits analysed — commit size distribution looks healthy.", total))
 	}
-	b.WriteString(insightStyle.Width(width - 6).Render(insightText))
+	b.WriteString(insightStyle.Width(width - 4).Render(insightText))
 	b.WriteString("\n\n")
 
 	barW := width - 32

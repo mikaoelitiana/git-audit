@@ -52,7 +52,7 @@ func renderMergeFreq(t *theme.Theme, data []git.MergeFreqEntry, err error, loadi
 		trendStr = t.Dim.Render("↓ declining")
 	}
 
-	b.WriteString(t.InsightInfo.Width(width - 6).Render(
+	b.WriteString(t.InsightInfo.Width(width - 4).Render(
 		t.Blue.Render(fmt.Sprintf("total merges: %d   avg/mo: %.0f   recent avg: %.0f   trend: ", total, avg, recentAvg)) + trendStr,
 	))
 	b.WriteString("\n\n")

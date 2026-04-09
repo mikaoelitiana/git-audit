@@ -36,7 +36,7 @@ func renderFirefighting(t *theme.Theme, data []git.HotfixEntry, err error, loadi
 		insightStyle = t.InsightCrit
 		insightText = t.RedB.Render(fmt.Sprintf("⚠  %d crisis events  ", n)) + t.Red.Render("Team may be in sustained firefighting mode — check test coverage and staging.")
 	}
-	b.WriteString(insightStyle.Width(width - 6).Render(insightText))
+	b.WriteString(insightStyle.Width(width - 4).Render(insightText))
 	b.WriteString("\n\n")
 
 	if len(data) == 0 {

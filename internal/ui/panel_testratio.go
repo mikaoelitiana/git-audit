@@ -56,7 +56,7 @@ func renderTestRatio(t *theme.Theme, data []git.TestRatioEntry, err error, loadi
 		insightText = t.GreenB.Render(fmt.Sprintf("✓  %.0f%% of changes include tests  ", testPct)) +
 			t.Green.Render("Tests are keeping pace with source changes.")
 	}
-	b.WriteString(insightStyle.Width(width - 6).Render(insightText))
+	b.WriteString(insightStyle.Width(width - 4).Render(insightText))
 	b.WriteString("\n\n")
 
 	fileW := width - 38
