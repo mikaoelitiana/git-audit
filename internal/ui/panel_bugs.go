@@ -58,7 +58,7 @@ func renderBugs(t *theme.Theme, data []git.BugEntry, err error, loading bool, sc
 	b.WriteString("  " + divider(t, width-4) + "\n")
 
 	shown := 0
-	for i := scroll; i < len(data) && shown < height-8; i++ {
+	for i := scroll; i < len(data) && shown < height-11; i++ {
 		e := data[i]
 		fileStyle, barStyle := t.Base, t.Blue
 		if e.InChurn {

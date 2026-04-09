@@ -41,7 +41,7 @@ func renderStale(t *theme.Theme, data []git.StaleEntry, err error, loading bool,
 	b.WriteString("  " + divider(t, width-4) + "\n")
 
 	shown := 0
-	for i := scroll; i < len(data) && shown < height-8; i++ {
+	for i := scroll; i < len(data) && shown < height-11; i++ {
 		e := data[i]
 		age := t.Amber
 		if e.DaysAgo > 730 {

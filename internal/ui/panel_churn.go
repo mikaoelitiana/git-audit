@@ -43,7 +43,7 @@ func renderChurn(t *theme.Theme, data []git.ChurnEntry, err error, loading bool,
 	b.WriteString("  " + divider(t, width-4) + "\n")
 
 	shown := 0
-	for i := scroll; i < len(data) && shown < height-8; i++ {
+	for i := scroll; i < len(data) && shown < height-11; i++ {
 		e := data[i]
 		riskStyle := t.RiskStyle(e.Pct)
 		countStyle := t.Amber

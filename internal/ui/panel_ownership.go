@@ -57,7 +57,7 @@ func renderOwnership(t *theme.Theme, data []git.OwnershipEntry, err error, loadi
 	b.WriteString("  " + divider(t, width-4) + "\n")
 
 	shown := 0
-	for i := scroll; i < len(data) && shown < height-8; i++ {
+	for i := scroll; i < len(data) && shown < height-11; i++ {
 		e := data[i]
 		driftStr := t.Muted.Render("  —    ")
 		if e.Drifted {

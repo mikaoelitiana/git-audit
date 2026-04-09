@@ -58,7 +58,7 @@ func renderFirefighting(t *theme.Theme, data []git.HotfixEntry, err error, loadi
 		"rollback": t.Purple, "emergency": t.RedB,
 	}
 	shown := 0
-	for i := scroll; i < len(data) && shown < height-8; i++ {
+	for i := scroll; i < len(data) && shown < height-11; i++ {
 		e := data[i]
 		kStyle, ok := kindColor[e.Kind]
 		if !ok {
