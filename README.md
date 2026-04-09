@@ -80,6 +80,14 @@ git-audit ~/projects/my-app
 | 3 | **Bug Clusters** | Files most referenced in fix/bug commits |
 | 4 | **Velocity** | Monthly commit count over full history |
 | 5 | **Firefighting** | Revert/hotfix/rollback frequency |
+| 6 | **Stale Files** | Files untouched for 1+ year |
+| 7 | **Long-lived Branches** | Branches older than 90 days |
+| 8 | **Co-change Coupling** | File pairs always committed together |
+| 9 | **Fresh Files** | New files added in the last 90 days |
+| 10 | **Ownership Drift** | Files that changed primary owner |
+| 11 | **Test Ratio** | Ratio of test changes to source changes |
+| 12 | **Commit Sizes** | Distribution of commit sizes |
+| 13 | **Merge Frequency** | Monthly merge commit count |
 
 ## Stack
 
